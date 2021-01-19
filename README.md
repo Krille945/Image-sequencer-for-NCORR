@@ -10,6 +10,12 @@ The program has a GUI made with Tkinter, and will sequence a video file into ind
 1. Matlab
 2. NCORR
 3. Anaconda
+ 
+
+# Installation proces
+If all of the required programs above are installed then all that is needed is download the files an put them into the same folder. Then you need to import the enviroment into anaconda (thats the .yml file) and then run the python script from that enviroment in something like anaconda prompt. After that a GUI should pop up allowing you to start sequensing your video data into frames and then open ncorr from there.
+
+In one of the following versions this will properly be turned into an .exe to simplify the process
 
 # known bugs
 1. closing the sequencer will also close NCORR
