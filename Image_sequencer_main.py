@@ -25,7 +25,7 @@ i = 0
 framenumber = tk.IntVar()
 framenumber2 = tk.IntVar()
 
-#eng = matlab.engine.start_matlab()
+eng = matlab.engine.start_matlab()
 
 def open_folder():
     global viddir
