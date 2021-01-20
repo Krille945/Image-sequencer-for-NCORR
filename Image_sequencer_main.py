@@ -1,13 +1,15 @@
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import ttk
 from PIL import ImageTk, Image
 import cv2
 from datetime import datetime
 import os 
 import sys
 import matlab.engine
+from collapsiblepane import CollapsiblePane as cp
 
-
+#eng = matlab.engine.start_matlab()
 HEIGHT = 700
 WIDTH = 800
 
@@ -25,7 +27,9 @@ i = 0
 framenumber = tk.IntVar()
 framenumber2 = tk.IntVar()
 
-#eng = matlab.engine.start_matlab()
+Start_frame = tk.IntVar()
+End_frame = tk.IntVar()
+Frame_skip = tk.IntVar()
 
 def open_folder():
     global viddir
@@ -85,8 +89,8 @@ def start_sequensing():
             break
     
 def Open_ncorr():
-        
-    eng.open_ncorr_only(nargout=0)
+    #eng.Video_with_ncorr(nargout = 0)
+    os.system("start_ncorr.py")
 
 def page3(root):
     global page
@@ -95,7 +99,11 @@ def page3(root):
     global max_x
 
     page = tk.Frame(root, bg='#272727', bd=5)
-    page.place(relx=0.52, rely=0.01, relwidth=0.47, relheight=0.98,)
+    page.place(relx=0.52, rely=0.01, relwidth=0.47, relheight=0.98)
+
+    Label2 = tk.Label(page, text = 'Image Preview', bd=0, bg='#272727', font=30, fg='#ffffff')
+    Label2.place(relx=0.02, rely=0.01)
+
     #display first
     changeimage(z=0,f=1)
     c = 0
@@ -146,7 +154,6 @@ def type2image(g):
         changeimage(z=h,f=g)
         x=h
     
-
 def changeimage(z,f):
     global x
 
@@ -211,7 +218,7 @@ def changeimageup2():
 def page1(root):
     global page
     page = tk.Frame(root, bg='#272727', bd=5)
-    page.place(relx=0.01, rely=0.01, relwidth=0.5, relheight=0.98,)
+    page.place(relx=0.01, rely=0.01, relwidth=0.5, relheight=0.98)
 
     Label = tk.Label(page, text = 'NCORR Image sequencer', bd=0, bg='#272727', font=30, fg='#ffffff')
     Label.place(relx=0.02, rely=0.01)
@@ -240,6 +247,32 @@ def page1(root):
     button_start_NCORR = tk.Button(page, text="open NCORR", font=40, bg='#545454',fg='#ffffff', command= Open_ncorr)
     button_start_NCORR.place(relx=0.01, rely=0.95)
 
+    #drop down pane 
+    cpane = cp(page, expanded_text ='Advanced settings',collapsed_text ='Advanced settings') 
+    cpane.place(relx=0.0, rely=0.2) 
+
+
+    #start frame
+    Start_frame.set = 0
+    l1 = tk.Label(cpane.frame,text ="Start frame:", bg='#272727',fg='#ffffff').grid(row = 1, column = 2,sticky = tk.W)
+    e1 = tk.Entry(cpane.frame, textvariable= Start_frame).grid(row = 2, column = 2, pady=5, padx=5)
+
+    #end frame
+    End_frame.set = 0
+    l2 = tk.Label(cpane.frame,text ="End frame:", bg='#272727',fg='#ffffff').grid(row = 3, column = 2,sticky = tk.W)
+    e2 = tk.Entry(cpane.frame, textvariable= End_frame).grid(row = 4, column = 2, pady=5, padx=5)
+
+    #frame skip
+    Frame_skip.set = 0
+    l3 = tk.Label(cpane.frame,text ="Skip # frames:", bg='#272727',fg='#ffffff').grid(row = 5, column = 2,sticky = tk.W)
+    e3 = tk.Entry(cpane.frame, textvariable= Frame_skip).grid(row = 6, column = 2, pady=5, padx=5)
+
+    cb1 = tk.Button(cpane.frame, text ="Load roi", bg='#545454',fg='#ffffff').grid( row = 7, column = 2, sticky = tk.W, pady=5, padx=5)
+    
+    enable = tk.Button(cpane.frame, text ="Enable Settings", bg='#545454',fg='#ffffff', font=40).grid( row = 8, column = 2, sticky = tk.W, pady=5, padx=5)
+
+
+
 def page2(root):
     page = tk.Frame(root, bg='#a6a6a6', bd=5)
     page.place(relx=0.01, rely=0.01, relwidth=0.5, relheight=0.98,)
@@ -264,5 +297,6 @@ def changepage():
 pagenum = 1
 
 page1(canvas)
+
 
 root.mainloop()
