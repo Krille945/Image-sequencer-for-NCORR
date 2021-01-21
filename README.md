@@ -17,6 +17,22 @@ If all of the required programs above are installed then all that is needed is d
 
 In one of the following versions this will properly be turned into an .exe to simplify the process
 
+
+you might also need to install the matlab engine your self this is done by going in to anaconda prompt and then type:
+
+activate sequencer 
+
+which will activate the enviroment then you need to type:
+
+cd C:\Program Files\MATLAB\R2020b\extern\engines\python
+
+and at last type:
+
+python setup.py install
+
+now the engine should be installed correctly
+this should only be a problem if your matlab is installed elsewhere 
+
 # known bugs
 1. closing the sequencer will also close NCORR
 2. cant process files with unusual characters like æøå
