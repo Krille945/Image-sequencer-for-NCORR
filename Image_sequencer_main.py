@@ -9,7 +9,7 @@ import sys
 import matlab.engine
 from collapsiblepane import CollapsiblePane as cp
 
-#eng = matlab.engine.start_matlab()
+eng = matlab.engine.start_matlab()
 HEIGHT = 700
 WIDTH = 800
 
@@ -22,42 +22,76 @@ canvas.pack()
 path_file =''
 nm_files = 0
 viddir= ''
-dirName= ''
+ROI_Path = ''
 i = 0
+vid = ''
+dirName = ''
+
+ii = 0
+mm = 0
+tt = 0
 framenumber = tk.IntVar()
 framenumber2 = tk.IntVar()
 
 Start_frame = tk.IntVar()
 End_frame = tk.IntVar()
 Frame_skip = tk.IntVar()
+length = 0
+
+global script_path
+script_path = os.path.dirname(__file__)
+#writes dirName in a dir.txt allowing communication between matlab and python
+Folder_txt = (script_path+'\dir.txt')
 
 def open_folder():
     global viddir
     global nm_files
     global path_file
+    global dirName
+    global length
+    global vid
 
     path_file = filedialog.askopenfilename(title='Select file', filetypes=(("avi files", "*.avi"),("all files", "*.*")))
     entry_path = tk.Label(page, text = path_file)
     entry_path.place(relx=0.01, rely=0.07, relwidth=0.70,relheight=0.04)
     viddir = path_file
 
-global script_path
-script_path = os.path.dirname(__file__)
-
-def start_sequensing():
-    global dirName
-    global length
-
-
     #defines path to the folder for the sequenced images
     dirName = path_file
     dirName = ".".join(dirName.split(".")[:-1])
 
-    #writes dirName in a dir.txt allowing communication between matlab and python
-    Folder_txt = (script_path+'\dir.txt')
+    #openCV loads the video
+    vid = cv2.VideoCapture(viddir)
+    #defines counter
+
+
+    #determens the amount of frames and is usesd as stop function
+    length = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
+
+def Load_ROI():
+   
+    Path_ROI = filedialog.askopenfilename(title='Select file', filetypes=(("png files", "*.png"),("all files", "*.*")))
+
+    with open(Folder_txt, 'r') as file:
+        paths=file.readlines()
+        paths[1]=Path_ROI
 
     with open(Folder_txt, 'w') as file:
-        file.writelines( dirName )
+        file.writelines( paths )
+        file.close
+
+def start_sequensing(i,m,t):
+    global dirName
+    global length
+    global vid
+
+    with open(Folder_txt, 'r') as file:
+        paths=file.readlines()
+        paths[0]=dirName
+
+    with open(Folder_txt, 'w') as file:
+        file.writelines( paths )
+        file.close
     
     try:
         #Creates folder for the images 
@@ -66,31 +100,24 @@ def start_sequensing():
     except FileExistsError:
         print("Directory " , dirName ,  " already exists")
 
-    #openCV loads the video
-    vid = cv2.VideoCapture(viddir)
-    #defines counter
-    i=0
-
-    #determens the amount of frames and is usesd as stop function
-    length = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
 
     #sequences the video and names them according to the NCORR format
-    while(vid.isOpened() and i <= length):
+    while(vid.isOpened() and i <= m):
         ret, frame = vid.read(i)
         if ret == False:
-            i+=1
+            i = i+t
             continue
         j = "0"
         k = len(str(i))
         cv2.imwrite(dirName+'/Frame_'+ (4-k)*j +str(i)+'.png',frame)
-        i+=1
-        if i == length:
+        i = i + t
+        if i == m:
             page3(canvas)
             break
     
 def Open_ncorr():
-    #eng.Video_with_ncorr(nargout = 0)
-    os.system("start_ncorr.py")
+    eng.open_ncorr(nargout = 0)
+    #os.system("start_ncorr.py")
 
 def page3(root):
     global page
@@ -106,12 +133,12 @@ def page3(root):
 
     #display first
     changeimage(z=0,f=1)
-    c = 0
+    c = ii
     #display second image 
     max_x = length-1
     x = max_x
-    changeimage(z=x,f=2)
-    
+    changeimage(z=max_x,f=2)
+
 
     ImgDownButton2 = tk.Button(page, text = '<', command=changeimagedown, bg='#545454',fg='#ffffff')
     ImgDownButton2.place(relx=0.7, rely=0.47,relheight = 0.04)
@@ -157,6 +184,7 @@ def type2image(g):
 def changeimage(z,f):
     global x
 
+
     dirName = path_file
     dirName = ".".join(dirName.split(".")[:-1])
 
@@ -184,39 +212,56 @@ def changeimage(z,f):
         framenumber.set(z)
     
 def changeimagedown():
-    global c 
-    c = c-1
-    if c < 0:
-     c=0
+    global c
+    global tt
+    c = c-tt
+    if c < ii:
+     c=ii
 
     changeimage(z=c, f=1)
 
 def changeimageup():
     global c
-    c= c+1
-    if c > max_x:
-        c=max_x
+    global tt
+    c= c+tt
+    if c > mm - 1:
+        c= mm - 1
 
     changeimage(z=c,f=1)
 
 def changeimagedown2():
     global x 
-    x = x-1
-    if x < 0:
-     x=0
+    global tt
+    x = x-tt
+    if x < ii:
+     x=ii
 
     changeimage(z=x, f=2)
 
 def changeimageup2():
     global x
-    x= x+1
-    if x > max_x:
-        x=max_x
+    global tt
+    x= x+tt
+    if x > mm - 1:
+        x= mm - 1
 
     changeimage(z=x,f=2)
 
+def sequencer():
+    global ii
+    global mm
+    global tt
+    start_sequensing(i=0,m=length,t=1)
+    ii =0
+    mm=length
+    tt=1
+
 def page1(root):
     global page
+    global e1
+    global e2
+    global e3
+
     page = tk.Frame(root, bg='#272727', bd=5)
     page.place(relx=0.01, rely=0.01, relwidth=0.5, relheight=0.98)
 
@@ -236,12 +281,12 @@ def page1(root):
 
 
     #starts sequensing
-    button_start_sek = tk.Button(page, text="start sequencing", font=40, command= start_sequensing, bg='#545454',fg='#ffffff')
+    button_start_sek = tk.Button(page, text="start sequencing", font=40, command= sequencer, bg='#545454',fg='#ffffff')
     button_start_sek.place(relx=0.01, rely=0.14)
 
     #check box
-    c_ncorr= tk.Checkbutton(page, text="Do you wan't to continue working with this data in NCORR", bg='#272727',fg='#ffffff')
-    c_ncorr.place(relx=0.01, rely=0.9)
+    #c_ncorr= tk.Checkbutton(page, text="Do you wan't to continue working with this data in NCORR", bg='#272727',fg='#ffffff')
+    #c_ncorr.place(relx=0.01, rely=0.9)
 
     #start ncorr
     button_start_NCORR = tk.Button(page, text="open NCORR", font=40, bg='#545454',fg='#ffffff', command= Open_ncorr)
@@ -263,15 +308,40 @@ def page1(root):
     e2 = tk.Entry(cpane.frame, textvariable= End_frame).grid(row = 4, column = 2, pady=5, padx=5)
 
     #frame skip
-    Frame_skip.set = 0
+    Frame_skip.set = 1
     l3 = tk.Label(cpane.frame,text ="Skip # frames:", bg='#272727',fg='#ffffff').grid(row = 5, column = 2,sticky = tk.W)
     e3 = tk.Entry(cpane.frame, textvariable= Frame_skip).grid(row = 6, column = 2, pady=5, padx=5)
 
-    cb1 = tk.Button(cpane.frame, text ="Load roi", bg='#545454',fg='#ffffff').grid( row = 7, column = 2, sticky = tk.W, pady=5, padx=5)
+    ROI_button = tk.Button(cpane.frame, text ="Load roi", bg='#545454',fg='#ffffff', command=Load_ROI).grid( row = 7, column = 2, sticky = tk.W, pady=5, padx=5)
     
-    enable = tk.Button(cpane.frame, text ="Enable Settings", bg='#545454',fg='#ffffff', font=40).grid( row = 8, column = 2, sticky = tk.W, pady=5, padx=5)
+    enable = tk.Button(cpane.frame, text ="Enable Settings", bg='#545454',fg='#ffffff', font=40, command=advanced_setup).grid( row = 8, column = 2, sticky = tk.W, pady=5, padx=5)
+
+def advanced_setup():
+    global e1
+    global e2
+    global e3
+    global vid
+    global ii
+    global mm
+    global tt
 
 
+    original_frames=os.listdir(dirName)
+    filtered = [file for file in original_frames if file.endswith('.png')]
+    for file in filtered:
+        path_to_file = os.path.join(dirName, file)
+        os.remove(path_to_file)
+
+    vid = cv2.VideoCapture(viddir)
+
+    geti=Start_frame.get()
+    getm=End_frame.get()
+    gett=Frame_skip.get()
+
+    ii = int(geti)
+    mm = int(getm)+1
+    tt= int(gett)
+    start_sequensing(i=int(geti),m=getm + 1,t=int(gett))
 
 def page2(root):
     page = tk.Frame(root, bg='#a6a6a6', bd=5)
@@ -300,3 +370,5 @@ page1(canvas)
 
 
 root.mainloop()
+
+eng.quit()
