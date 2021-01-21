@@ -6,10 +6,10 @@ import cv2
 from datetime import datetime
 import os 
 import sys
-import matlab.engine
+#import matlab.engine
 from collapsiblepane import CollapsiblePane as cp
 
-eng = matlab.engine.start_matlab()
+#eng = matlab.engine.start_matlab()
 HEIGHT = 700
 WIDTH = 800
 
@@ -41,7 +41,7 @@ length = 0
 global script_path
 script_path = os.path.dirname(__file__)
 #writes dirName in a dir.txt allowing communication between matlab and python
-Folder_txt = (script_path+'\dir.txt')
+#Folder_txt = (script_path+'\dir.txt')
 
 def open_folder():
     global viddir
@@ -72,26 +72,26 @@ def Load_ROI():
    
     Path_ROI = filedialog.askopenfilename(title='Select file', filetypes=(("png files", "*.png"),("all files", "*.*")))
 
-    with open(Folder_txt, 'r') as file:
-        paths=file.readlines()
-        paths[1]=Path_ROI
+    #with open(Folder_txt, 'r') as file:
+    #    paths=file.readlines()
+    #    paths[1]=Path_ROI
 
-    with open(Folder_txt, 'w') as file:
-        file.writelines( paths )
-        file.close
+    #with open(Folder_txt, 'w') as file:
+    #    file.writelines( paths )
+    #    file.close
 
 def start_sequensing(i,m,t):
     global dirName
     global length
     global vid
 
-    with open(Folder_txt, 'r') as file:
-        paths=file.readlines()
-        paths[0]=dirName
+    #with open(Folder_txt, 'r') as file:
+    #    paths=file.readlines()
+    #    paths[0]=dirName
 
-    with open(Folder_txt, 'w') as file:
-        file.writelines( paths )
-        file.close
+    #with open(Folder_txt, 'w') as file:
+    #    file.writelines( paths )
+    #    file.close
     
     try:
         #Creates folder for the images 
@@ -115,8 +115,8 @@ def start_sequensing(i,m,t):
             page3(canvas)
             break
     
-def Open_ncorr():
-    eng.open_ncorr(nargout = 0)
+#def Open_ncorr():
+    #eng.open_ncorr(nargout = 0)
     #os.system("start_ncorr.py")
 
 def page3(root):
@@ -287,9 +287,9 @@ def page1(root):
     #check box
     #c_ncorr= tk.Checkbutton(page, text="Do you wan't to continue working with this data in NCORR", bg='#272727',fg='#ffffff')
     #c_ncorr.place(relx=0.01, rely=0.9)
-
+    #command= Open_ncorr
     #start ncorr
-    button_start_NCORR = tk.Button(page, text="open NCORR", font=40, bg='#545454',fg='#ffffff', command= Open_ncorr)
+    button_start_NCORR = tk.Button(page, text="open NCORR", font=40, bg='#545454',fg='#ffffff')
     button_start_NCORR.place(relx=0.01, rely=0.95)
 
     #drop down pane 
@@ -371,4 +371,4 @@ page1(canvas)
 
 root.mainloop()
 
-eng.quit()
+#eng.quit()
